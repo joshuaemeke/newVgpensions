@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -72,6 +73,61 @@ namespace Veritas.Controllers
 
         }
 
+        public async Task<ActionResult> UpdateProfileImage(HttpPostedFileBase upload)
+        {
+            decimal OpId = (decimal) System.Web.HttpContext.Current.Session["userId"];
+
+            string targetPath = @"~/App_Data/uploads";
+
+            if (upload != null && upload.ContentLength > 0)
+            {
+                if (!Directory.Exists(targetPath))
+                {
+                    Directory.CreateDirectory(targetPath);
+                }
+
+                string fileName = Path.GetFileName(upload.FileName);
+                string filePath = Path.Combine(Server.MapPath("~/Uploads"), fileName);
+
+                try
+                {
+                    upload.SaveAs(filePath);
+
+                    //lets insert the image into the database
+                    var userDate = (from u in db.ProfileImages where u.UserId == OpId select u).FirstOrDefault();
+                    
+                    if(userDate != null){
+                        userDate.ImagePath= upload.FileName;
+                        db.Entry(userDate).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        //this user is just uploading the picture
+                        var userImage = new ProfileImage
+                        {
+                            UserId = OpId,
+                            ImagePath = upload.FileName
+                        };
+                        db.ProfileImages.Add(userImage);
+                        await db.SaveChangesAsync();
+                    }
+                    return Json(new { success = true }, JsonRequestBehavior.AllowGet);
+
+                }
+                catch (Exception)
+                {
+
+                    return Json(new { success = false }, JsonRequestBehavior.AllowGet);
+
+                }
+
+
+
+            }
+            return Json(new { success = false }, JsonRequestBehavior.AllowGet);
+
+        }
+
         public async Task<ActionResult> auth(string email, string password)
         {
             var user = (from u in db.portal_s_websure where u.EMAIL == email && u.PASSWORD == password select u).FirstOrDefault();
@@ -79,6 +135,7 @@ namespace Veritas.Controllers
             if (user != null)
             {
                 System.Web.HttpContext.Current.Session.Add("username", user.USERNAME);
+                System.Web.HttpContext.Current.Session.Add("userId", user.USERID);
                 return RedirectToAction("Index", "Home");
             }
             return RedirectToAction("Login", "Home");

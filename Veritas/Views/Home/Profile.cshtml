@@ -23,18 +23,20 @@
     }
     <div class="col_ col-md-3">
         
-                <div align="center">
-                    <div class="h1">Profile</div>
-                    <img class="img-circle img-responsive img-rounded img-with-border" src="~/Image/avatar.jpg" />
-                    <div class="h2">@fullname</div>
-                    <div class="h3">Customer</div>
-                    <div class="container-fluid">
-                        <button class="upload">Upload New Image</button>
-                    </div>
-                    <div class="container-fluid">
-                        <button class="delete">Delete</button>
-                    </div>
+        <div align="center">
+            <div class="h1">Profile</div>
+            <img class="img-circle img-responsive img-rounded img-with-border" src="~/Image/avatar.jpg" />
+            <div class="h2">@fullname</div>
+            <div class="h3">Customer</div>
+            <form action="/home/UpdateProfileImage" method="post" enctype="multipart/form-data">
+                <div class="container-fluid">
+                    <input class="upload" type="file" name="upload"/>
                 </div>
+                <div class="container-fluid">
+                    <button class="upload" type="submit">Upload New Image</button>
+                </div>
+            </form>
+        </div>
                 <div class="vl"></div>
             </div>
     <div class="col_ col-md-9 info-col">
